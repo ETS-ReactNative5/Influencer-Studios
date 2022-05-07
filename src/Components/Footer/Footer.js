@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
@@ -114,6 +115,27 @@ const Contact = ({ classes }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState(false);
+
+  const submit = async () => {
+    try {
+      let text = `Name: ${name}\nEmail: ${email}\nPhone: ${phone}`;
+      let result = await axios.post(
+        'https://us-central1-ignitestudios-4cf86.cloudfunctions.net/api/v1/emails',
+        {
+          subject: `Website Outreach - ${name}`,
+          to: 'info@ignitestudios.com',
+          text,
+        }
+      );
+      console.log(result);
+      setSent(true);
+    } catch (e) {
+      console.log(e);
+      setError(true);
+    }
+  };
 
   return (
     <Paper className={classes.paper}>
@@ -130,48 +152,67 @@ const Contact = ({ classes }) => {
         />
       </div>
       <div className={classes.formWrapper}>
-        <Typography style={{ color: 'white' }} variant="h6">
-          Schedule Now!
-        </Typography>
-        <div className={classes.formContent}>
-          <div className={classes.form}>
-            <div className={classes.textField}>
-              <TextField
-                fullWidth
-                label="Full Name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                InputProps={{
-                  className: classes.input,
-                }}
-              />
+        {sent ? (
+          <>
+            <Typography style={{ color: 'white' }} variant="h6">
+              Message successfully sent!
+            </Typography>
+            <MicIcon className={classes.micIcon} />
+          </>
+        ) : (
+          <>
+            <Typography style={{ color: 'white' }} variant="h6">
+              Schedule Now!
+            </Typography>
+            <div className={classes.formContent}>
+              <div className={classes.form}>
+                <div className={classes.textField}>
+                  <TextField
+                    fullWidth
+                    label="Full Name"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    InputProps={{
+                      className: classes.input,
+                    }}
+                  />
+                </div>
+                <div className={classes.textField}>
+                  <TextField
+                    fullWidth
+                    label="Phone"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    InputProps={{
+                      className: classes.input,
+                    }}
+                  />
+                </div>
+                <div className={classes.textField}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    InputProps={{
+                      className: classes.input,
+                    }}
+                  />
+                </div>
+                {error && (
+                  <Typography style={{ color: 'red' }} variant="h6">
+                    It seems there as an error sending the message, please try
+                    again.
+                  </Typography>
+                )}
+                <Button className={classes.button} onClick={submit}>
+                  Schedule
+                </Button>
+              </div>
+              <MicIcon className={classes.micIcon} />
             </div>
-            <div className={classes.textField}>
-              <TextField
-                fullWidth
-                label="Phone"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                InputProps={{
-                  className: classes.input,
-                }}
-              />
-            </div>
-            <div className={classes.textField}>
-              <TextField
-                fullWidth
-                label="Email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                InputProps={{
-                  className: classes.input,
-                }}
-              />
-            </div>
-            <Button className={classes.button}>Schedule</Button>
-          </div>
-          <MicIcon className={classes.micIcon} />
-        </div>
+          </>
+        )}
       </div>
       <div className={classes.socialMediaWrapper}>
         <Typography style={{ color: '#fff', fontWeight: 500 }}>
